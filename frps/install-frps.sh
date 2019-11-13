@@ -8,13 +8,13 @@ export PATH
 #   Intro:  http://koolshare.cn/forum-72-1.html
 #===============================================================================================
 program_name="frps"
-version="1.8.5"
+version="0.29.1"
 str_program_dir="/usr/local/${program_name}"
 program_init="/etc/init.d/${program_name}"
 program_config_file="frps.ini"
 ver_file="/tmp/.frp_ver.sh"
-program_version_link="https://raw.githubusercontent.com/clangcn/onekey-install-shell/master/frps/version.sh"
-str_install_shell=https://raw.githubusercontent.com/clangcn/onekey-install-shell/master/frps/install-frps.sh
+program_version_link="https://raw.githubusercontent.com/F2L-forever/onekey-install-shell/master/frps/version.sh"
+str_install_shell=https://raw.githubusercontent.com/F2L-forever/onekey-install-shell/master/frps/install-frps.sh
 shell_update(){
     fun_clangcn "clear"
     echo "Check updates for shell..."
@@ -90,6 +90,8 @@ checkos(){
         OS=Debian
     elif grep -Eqi "Ubuntu" /etc/issue || grep -Eq "Ubuntu" /etc/*-release; then
         OS=Ubuntu
+    elif grep -Eqi "Deepin" /etc/issue || grep -Eq "Deepin" /etc/*-release; then
+        OS=Deepin
     else
         echo "Not support OS, Please reinstall OS and retry!"
         exit 1
@@ -180,25 +182,21 @@ fun_get_version(){
     fi
 }
 fun_getServer(){
-    def_server_url="aliyun"
+    def_server_url="github"
     echo ""
     echo -e "Please select ${program_name} download url:"
-    echo -e "[1].aliyun (default)"
-    echo -e "[2].github"
-    read -p "Enter your choice (1, 2 or exit. default [${def_server_url}]): " set_server_url
+    echo -e "[1].github (default)"
+    read -p "Enter your choice (1 or exit. default [${def_server_url}]): " set_server_url
     [ -z "${set_server_url}" ] && set_server_url="${def_server_url}"
     case "${set_server_url}" in
         1|[Aa][Ll][Ii][Yy][Uu][Nn])
-            program_download_url=${aliyun_download_url}
-            ;;
-        2|[Gg][Ii][Tt][Hh][Uu][Bb])
             program_download_url=${github_download_url}
             ;;
         [eE][xX][iI][tT])
             exit 1
             ;;
         *)
-            program_download_url=${aliyun_download_url}
+            program_download_url=${github_download_url}
             ;;
     esac
     echo "---------------------------------------"
@@ -262,6 +260,24 @@ fun_check_port(){
         fun_input_${port_flag}_port
     fi
 }
+fun_check_subdomain_host(){
+    input_subdomain_host=""
+    strCheckSubdomainHost="$1"
+    strB="."
+    if [ -n "$strCheckSubdomainHost" ]; then
+        result=$(echo $strCheckSubdomainHost | grep "${strB}")
+        if [[ "$result" != "" ]]; then
+            input_subdomain_host="${strCheckSubdomainHost}"
+        else
+            echo "Input error! Please input subdomain_host (eg: frps.com)."
+            fun_input_subdomain_host
+        fi
+    else
+        echo "Input error! Please input subdomain_host (eg: frps.com)."
+        fun_input_subdomain_host
+    fi
+}
+
 fun_check_number(){
     num_flag=""
     strMaxNum=""
@@ -277,22 +293,29 @@ fun_check_number(){
         fun_input_${num_flag}
     fi
 }
+fun_add_firewall(){
+    firewall-cmd --zone=public --add-port=$1/$2 --permanent
+    firewall-cmd --reload
+}
+
 # input port
 fun_input_bind_port(){
-    def_server_port="5443"
+    def_server_port="7000"
     echo ""
     echo -n -e "Please input ${program_name} ${COLOR_GREEN}bind_port${COLOR_END} [1-65535]"
     read -p "(Default Server Port: ${def_server_port}):" serverport
     [ -z "${serverport}" ] && serverport="${def_server_port}"
     fun_check_port "bind" "${serverport}"
+    fun_add_firewall ${serverport} tcp
 }
 fun_input_dashboard_port(){
-    def_dashboard_port="6443"
+    def_dashboard_port="7500"
     echo ""
     echo -n -e "Please input ${program_name} ${COLOR_GREEN}dashboard_port${COLOR_END} [1-65535]"
     read -p "(Default dashboard_port: ${def_dashboard_port}):" input_dashboard_port
     [ -z "${input_dashboard_port}" ] && input_dashboard_port="${def_dashboard_port}"
     fun_check_port "dashboard" "${input_dashboard_port}"
+    fun_add_firewall ${input_dashboard_port} tcp
 }
 fun_input_vhost_http_port(){
     def_vhost_http_port="80"
@@ -301,6 +324,7 @@ fun_input_vhost_http_port(){
     read -p "(Default vhost_http_port: ${def_vhost_http_port}):" input_vhost_http_port
     [ -z "${input_vhost_http_port}" ] && input_vhost_http_port="${def_vhost_http_port}"
     fun_check_port "vhost_http" "${input_vhost_http_port}"
+    fun_add_firewall ${input_vhost_http_port} tcp
 }
 fun_input_vhost_https_port(){
     def_vhost_https_port="443"
@@ -309,6 +333,16 @@ fun_input_vhost_https_port(){
     read -p "(Default vhost_https_port: ${def_vhost_https_port}):" input_vhost_https_port
     [ -z "${input_vhost_https_port}" ] && input_vhost_https_port="${def_vhost_https_port}"
     fun_check_port "vhost_https" "${input_vhost_https_port}"
+    fun_add_firewall ${input_vhost_https_port} tcp
+}
+
+fun_input_subdomain_host(){
+    def_subdomain_host="frps.com"
+    echo ""
+    echo -n -e "Please input ${program_name} ${COLOR_GREEN}subdomain_host${COLOR_END} "
+    read -p "(Default subdomain_host: ${def_subdomain_host}):" input_subdomain_host
+    [ -z "${input_subdomain_host}" ] && input_subdomain_host="${def_subdomain_host}"
+    fun_check_subdomain_host "${input_subdomain_host}"
 }
 fun_input_log_max_days(){
     def_max_days="30"
@@ -369,6 +403,10 @@ pre_install_clang(){
         read -p "Please input dashboard_pwd (Default: ${def_dashboard_pwd}):" set_dashboard_pwd
         [ -z "${set_dashboard_pwd}" ] && set_dashboard_pwd="${def_dashboard_pwd}"
         echo "${program_name} dashboard_pwd: ${set_dashboard_pwd}"
+        echo ""
+        fun_input_subdomain_host
+        [ -n "${input_subdomain_host}" ] && set_vhost_http_port="${input_subdomain_host}"
+        echo "${input_subdomain_host} subdomain_host: ${input_subdomain_host}"
         echo ""
         default_token=`fun_randstr 16`
         read -p "Please input token (Default: ${default_token}):" set_token
@@ -517,30 +555,54 @@ cat > ${str_program_dir}/${program_config_file}<<-EOF
 # in square brackets, as in "[::1]:80", "[ipv6-host]:http" or "[ipv6-host%zone]:80"
 bind_addr = 0.0.0.0
 bind_port = ${set_bind_port}
+# udp port to help make udp hole to penetrate nat
+#bind_udp_port = 7001
 # udp port used for kcp protocol, it can be same with 'bind_port'
 # if not set, kcp is disabled in frps
 #kcp_bind_port = ${set_bind_port}
-# if you want to configure or reload frps by dashboard, dashboard_port must be set
-dashboard_port = ${set_dashboard_port}
-# dashboard assets directory(only for debug mode)
-dashboard_user = ${set_dashboard_user}
-dashboard_pwd = ${set_dashboard_pwd}
-# assets_dir = ./static
+# specify which address proxy will listen for, default value is same with bind_addr
+# proxy_bind_addr = 127.0.0.1
+# if you want to support virtual host, you must set the http port for listening (optional)
+# Note: http port and https port can be same with bind_port
 vhost_http_port = ${set_vhost_http_port}
 vhost_https_port = ${set_vhost_https_port}
+# response header timeout(seconds) for vhost http server, default is 60s
+# vhost_http_timeout = 60
+# set dashboard_addr and dashboard_port to view dashboard of frps
+# dashboard_addr's default value is same with bind_addr
+# dashboard is available only if dashboard_port is set
+dashboard_addr = 0.0.0.0
+dashboard_port = ${set_dashboard_port}
+# dashboard user and passwd for basic auth protect, if not set, both default value is admin
+dashboard_user = ${set_dashboard_user}
+dashboard_pwd = ${set_dashboard_pwd}
+# dashboard assets directory(only for debug mode)
+# assets_dir = ./static
 # console or real logFile path like ./frps.log
 log_file = ${str_log_file}
-# debug, info, warn, error
+# trace, debug, info, warn, error
 log_level = ${str_log_level}
 log_max_days = ${set_log_max_days}
+# disable log colors when log_file is console, default is false
+#disable_log_color = false
 # auth token
 token = ${set_token}
+# heartbeat configure, it's not recommended to modify the default value
+# the default value of heartbeat_timeout is 90
+# heartbeat_timeout = 90
 # only allow frpc to bind ports you list, if you set nothing, there won't be any limit
-#allow_ports = 1-65535
+#allow_ports = 2000-3000,3001,3003,4000-50000
 # pool_count in each proxy will change to max_pool_count if they exceed the maximum value
 max_pool_count = ${set_max_pool_count}
+# max ports can be used for each client, default value is 0 means no limit
+max_ports_per_client = ${set_tcp_mux}
+# if subdomain_host is not empty, you can set subdomain when type is http or https in frpc's configure file
+# when subdomain is test, the host used by routing is test.frps.com
+subdomain_host = ${subdomain_host}
 # if tcp stream multiplexing is used, default is true
-tcp_mux = ${set_tcp_mux}
+tcp_mux = true
+# custom 404 page for HTTP requests
+# custom_404_page = /path/to/404.html
 EOF
 else
 cat > ${str_program_dir}/${program_config_file}<<-EOF
@@ -550,30 +612,54 @@ cat > ${str_program_dir}/${program_config_file}<<-EOF
 # in square brackets, as in "[::1]:80", "[ipv6-host]:http" or "[ipv6-host%zone]:80"
 bind_addr = 0.0.0.0
 bind_port = ${set_bind_port}
+# udp port to help make udp hole to penetrate nat
+#bind_udp_port = 7001
 # udp port used for kcp protocol, it can be same with 'bind_port'
 # if not set, kcp is disabled in frps
 kcp_bind_port = ${set_bind_port}
-# if you want to configure or reload frps by dashboard, dashboard_port must be set
-dashboard_port = ${set_dashboard_port}
-# dashboard assets directory(only for debug mode)
-dashboard_user = ${set_dashboard_user}
-dashboard_pwd = ${set_dashboard_pwd}
-# assets_dir = ./static
+# specify which address proxy will listen for, default value is same with bind_addr
+# proxy_bind_addr = 127.0.0.1
+# if you want to support virtual host, you must set the http port for listening (optional)
+# Note: http port and https port can be same with bind_port
 vhost_http_port = ${set_vhost_http_port}
 vhost_https_port = ${set_vhost_https_port}
+# response header timeout(seconds) for vhost http server, default is 60s
+# vhost_http_timeout = 60
+# set dashboard_addr and dashboard_port to view dashboard of frps
+# dashboard_addr's default value is same with bind_addr
+# dashboard is available only if dashboard_port is set
+dashboard_addr = 0.0.0.0
+dashboard_port = ${set_dashboard_port}
+# dashboard user and passwd for basic auth protect, if not set, both default value is admin
+dashboard_user = ${set_dashboard_user}
+dashboard_pwd = ${set_dashboard_pwd}
+# dashboard assets directory(only for debug mode)
+# assets_dir = ./static
 # console or real logFile path like ./frps.log
 log_file = ${str_log_file}
-# debug, info, warn, error
+# trace, debug, info, warn, error
 log_level = ${str_log_level}
 log_max_days = ${set_log_max_days}
+# disable log colors when log_file is console, default is false
+#disable_log_color = false
 # auth token
 token = ${set_token}
+# heartbeat configure, it's not recommended to modify the default value
+# the default value of heartbeat_timeout is 90
+# heartbeat_timeout = 90
 # only allow frpc to bind ports you list, if you set nothing, there won't be any limit
-#allow_ports = 1-65535
+#allow_ports = 2000-3000,3001,3003,4000-50000
 # pool_count in each proxy will change to max_pool_count if they exceed the maximum value
 max_pool_count = ${set_max_pool_count}
+# max ports can be used for each client, default value is 0 means no limit
+max_ports_per_client = ${set_tcp_mux}
+# if subdomain_host is not empty, you can set subdomain when type is http or https in frpc's configure file
+# when subdomain is test, the host used by routing is test.frps.com
+subdomain_host = ${subdomain_host}
 # if tcp stream multiplexing is used, default is true
-tcp_mux = ${set_tcp_mux}
+tcp_mux = true
+# custom 404 page for HTTP requests
+# custom_404_page = /path/to/404.html
 EOF
 fi
     echo " done"
@@ -626,6 +712,10 @@ fi
     echo -e "Dashboard user     : ${COLOR_GREEN}${set_dashboard_user}${COLOR_END}"
     echo -e "Dashboard password : ${COLOR_GREEN}${set_dashboard_pwd}${COLOR_END}"
     echo "=============================================="
+    echo "=============================================="
+    echo -e "Subdomain host : ${COLOR_GREEN}${subdomain_host}${COLOR_END}"
+    echo "=============================================="
+
     echo ""
     echo -e "${program_name} status manage : ${COLOR_PINKBACK_WHITEFONT}${program_name}${COLOR_END} {${COLOR_GREEN}start|stop|restart|status|config|version${COLOR_END}}"
     echo -e "Example:"
@@ -692,9 +782,18 @@ update_config_clang(){
         search_tcp_mux=`grep "tcp_mux" ${str_program_dir}/${program_config_file}`
         search_token=`grep "privilege_token" ${str_program_dir}/${program_config_file}`
         search_allow_ports=`grep "privilege_allow_ports" ${str_program_dir}/${program_config_file}`
+        search_subdomain_host=`grep "subdomain_host" ${str_program_dir}/${program_config_file}`
         if [ -z "${search_dashboard_user}" ] || [ -z "${search_dashboard_pwd}" ] || [ -z "${search_kcp_bind_port}" ] || [ -z "${search_tcp_mux}" ] || [ ! -z "${search_token}" ] || [ ! -z "${search_allow_ports}" ];then
             echo -e "${COLOR_GREEN}Configuration files need to be updated, now setting:${COLOR_END}"
             echo ""
+            if [ -z "${search_subdomain_host}" ];then
+                def_subdomain_host_update="frps.com"
+                echo -n -e "Please input ${program_name} ${COLOR_GREEN}subdomain_host${COLOR_END} "
+                read -p "(Default subdomain_host: ${def_subdomain_host_update}):" set_subdomain_host_update
+                [ -z "${set_subdomain_host_update}" ] && set_subdomain_host_update="${def_subdomain_host_update}"
+                echo "${program_name} subdomain_host: ${set_subdomain_host_update}"
+                sed -i "/subdomain_host = ${set_subdomain_host_update}\n" ${str_program_dir}/${program_config_file}
+            fi
             if [ ! -z "${search_token}" ];then
                 sed -i "s/privilege_token/token/" ${str_program_dir}/${program_config_file}
             fi
@@ -772,8 +871,9 @@ update_config_clang(){
         verify_kcp_bind_port=`grep "kcp_bind_port" ${str_program_dir}/${program_config_file}`
         verify_tcp_mux=`grep "^tcp_mux" ${str_program_dir}/${program_config_file}`
         verify_token=`grep "privilege_token" ${str_program_dir}/${program_config_file}`
+        verify_subdomain_host=`grep "subdomain_host" ${str_program_dir}/${program_config_file}`
         verify_allow_ports=`grep "privilege_allow_ports" ${str_program_dir}/${program_config_file}`
-        if [ ! -z "${verify_dashboard_user}" ] && [ ! -z "${verify_dashboard_pwd}" ] && [ ! -z "${verify_kcp_bind_port}" ] && [ ! -z "${verify_tcp_mux}" ] && [ -z "${verify_token}" ] && [ -z "${verify_allow_ports}" ];then
+        if [ ! -z "${verify_dashboard_user}" ] && [ ! -z "${verify_dashboard_pwd}" ] && [ ! -z "${verify_kcp_bind_port}" ] && [ ! -z "${verify_tcp_mux}" ] && [ -z "${verify_token}" ] && [ ! -z "${verify_subdomain_host}" ] && [ -z "${verify_allow_ports}" ];then
             echo -e "${COLOR_GREEN}update configuration file successfully!!!${COLOR_END}"
         else
             echo -e "${COLOR_RED}update configuration file error!!!${COLOR_END}"
