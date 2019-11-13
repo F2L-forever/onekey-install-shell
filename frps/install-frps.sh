@@ -411,8 +411,8 @@ pre_install_clang(){
         echo "${program_name} dashboard_pwd: ${set_dashboard_pwd}"
         echo ""
         fun_input_subdomain_host
-        [ -n "${input_subdomain_host}" ] && set_vhost_http_port="${input_subdomain_host}"
-        echo "${input_subdomain_host} subdomain_host: ${input_subdomain_host}"
+        [ -n "${input_subdomain_host}" ] && set_subdomain_host="${input_subdomain_host}"
+        echo "${program_name} subdomain_host: ${set_subdomain_host}"
         echo ""
         default_token=`fun_randstr 16`
         read -p "Please input token (Default: ${default_token}):" set_token
@@ -538,6 +538,7 @@ pre_install_clang(){
         echo -e "Log level          : ${COLOR_GREEN}${str_log_level}${COLOR_END}"
         echo -e "Log max days       : ${COLOR_GREEN}${set_log_max_days}${COLOR_END}"
         echo -e "Log file           : ${COLOR_GREEN}${str_log_file_flag}${COLOR_END}"
+        echo -e "Subdomain_host     : ${COLOR_GREEN}${set_subdomain_host}${COLOR_END}"
         echo "=============================================="
         echo ""
         echo "Press any key to start...or Press Ctrl+c to cancel"
@@ -602,10 +603,10 @@ token = ${set_token}
 # pool_count in each proxy will change to max_pool_count if they exceed the maximum value
 max_pool_count = ${set_max_pool_count}
 # max ports can be used for each client, default value is 0 means no limit
-max_ports_per_client = ${set_tcp_mux}
+#max_ports_per_client = ${set_tcp_mux}
 # if subdomain_host is not empty, you can set subdomain when type is http or https in frpc's configure file
 # when subdomain is test, the host used by routing is test.frps.com
-subdomain_host = ${subdomain_host}
+subdomain_host = ${set_subdomain_host}
 # if tcp stream multiplexing is used, default is true
 tcp_mux = true
 # custom 404 page for HTTP requests
@@ -659,10 +660,10 @@ token = ${set_token}
 # pool_count in each proxy will change to max_pool_count if they exceed the maximum value
 max_pool_count = ${set_max_pool_count}
 # max ports can be used for each client, default value is 0 means no limit
-max_ports_per_client = ${set_tcp_mux}
+#max_ports_per_client = ${set_tcp_mux}
 # if subdomain_host is not empty, you can set subdomain when type is http or https in frpc's configure file
 # when subdomain is test, the host used by routing is test.frps.com
-subdomain_host = ${subdomain_host}
+subdomain_host = ${set_subdomain_host}
 # if tcp stream multiplexing is used, default is true
 tcp_mux = true
 # custom 404 page for HTTP requests
@@ -719,8 +720,7 @@ fi
     echo -e "Dashboard user     : ${COLOR_GREEN}${set_dashboard_user}${COLOR_END}"
     echo -e "Dashboard password : ${COLOR_GREEN}${set_dashboard_pwd}${COLOR_END}"
     echo "=============================================="
-    echo "=============================================="
-    echo -e "Subdomain host : ${COLOR_GREEN}${subdomain_host}${COLOR_END}"
+    echo -e "Subdomain host : ${COLOR_GREEN}${set_subdomain_host}${COLOR_END}"
     echo "=============================================="
 
     echo ""
