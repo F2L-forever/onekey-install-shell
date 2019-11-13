@@ -294,8 +294,14 @@ fun_check_number(){
     fi
 }
 fun_add_firewall(){
-    firewall-cmd --zone=public --add-port=$1/$2 --permanent
-    firewall-cmd --reload
+    checkos
+    if [ "${OS}" == 'CentOS' ]; then
+        firewall-cmd --zone=public --add-port=$1/$2 --permanent
+        firewall-cmd --reload
+    else
+        echo ""
+    fi
+    
 }
 
 # input port
@@ -503,6 +509,7 @@ pre_install_clang(){
         case "${str_kcp}" in
             1|[yY]|[yY][eE][sS]|[oO][nN]|[tT][rR][uU][eE]|[eE][nN][aA][bB][lL][eE])
                 set_kcp="true"
+                fun_add_firewall ${serverport} udp
                 ;;
             0|2|[nN]|[nN][oO]|[oO][fF][fF]|[fF][aA][lL][sS][eE]|[dD][iI][sS][aA][bB][lL][eE])
                 set_kcp="false"
