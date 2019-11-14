@@ -230,6 +230,7 @@ fun_getVer(){
     fi
 }
 fun_download_file(){
+    echo "down for $program_latest_file_url"
     # download
     if [ ! -s ${str_program_dir}/${program_name} ]; then
         rm -fr ${program_latest_filename} frp_${FRPS_VER}_linux_${ARCHS}
