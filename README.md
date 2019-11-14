@@ -4,6 +4,6 @@
 
 脚本是业余爱好，英文属于文盲，写的不好，欢迎您批评指正。
 
-安装平台：CentOS、Debian、Ubuntu。
+安装平台：CentOS、Debian、Ubuntu、Deepin。
 
 如需帮助请看相关README文件
