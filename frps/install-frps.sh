@@ -7,11 +7,22 @@ export PATH
 #   Author: Clang
 #   Intro:  http://koolshare.cn/forum-72-1.html
 #===============================================================================================
-program_name="frps"
+
 version="0.29.1"
-str_program_dir="/usr/local/${program_name}"
+
+soft_name="frp"
+
+program_name="frps"
+client_program_name="frpc"
+
+str_program_dir="/usr/local/${soft_name}/${program_name}"
+client_str_program_dir="/usr/local/${soft_name}/${client_program_name}"
+
 program_init="/etc/init.d/${program_name}"
+
 program_config_file="frps.ini"
+client_program_config_file="frpc.ini"
+
 ver_file="/tmp/.frp_ver.sh"
 program_version_link="https://raw.githubusercontent.com/F2L-forever/onekey-install-shell/master/frps/version.sh"
 str_install_shell=https://raw.githubusercontent.com/F2L-forever/onekey-install-shell/master/frps/install-frps.sh
@@ -222,12 +233,17 @@ fun_download_file(){
             exit 1
         fi
         tar xzf ${program_latest_filename}
+
         mv frp_${FRPS_VER}_linux_${ARCHS}/frps ${str_program_dir}/${program_name}
+
+        mv frp_${FRPS_VER}_linux_${ARCHS}/frpc ${client_str_program_dir}/${client_program_name}
+
         rm -fr ${program_latest_filename} frp_${FRPS_VER}_linux_${ARCHS}
     fi
     chown root:root -R ${str_program_dir}
     if [ -s ${str_program_dir}/${program_name} ]; then
         [ ! -x ${str_program_dir}/${program_name} ] && chmod 755 ${str_program_dir}/${program_name}
+        [ ! -x ${client_str_program_dir}/${client_program_name} ] && chmod 755 ${client_str_program_dir}/${client_program_name}
     else
         echo -e " ${COLOR_RED}failed${COLOR_END}"
         exit 1
@@ -368,6 +384,364 @@ fun_input_max_pool_count(){
     [ -z "${input_max_pool_count}" ] && input_max_pool_count="${def_max_pool_count}"
     fun_check_number "max_pool_count" "${def_max_pool}" "${input_max_pool_count}"
 }
+save_server_config(){
+if [[ "${set_kcp}" == "false" ]]; then
+cat > ${str_program_dir}/${program_config_file}<<-EOF
+# [common] is integral section
+[common]
+# A literal address or host name for IPv6 must be enclosed
+# in square brackets, as in "[::1]:80", "[ipv6-host]:http" or "[ipv6-host%zone]:80"
+bind_addr = 0.0.0.0
+bind_port = ${set_bind_port}
+# udp port to help make udp hole to penetrate nat
+#bind_udp_port = 7001
+# udp port used for kcp protocol, it can be same with 'bind_port'
+# if not set, kcp is disabled in frps
+#kcp_bind_port = ${set_bind_port}
+# specify which address proxy will listen for, default value is same with bind_addr
+# proxy_bind_addr = 127.0.0.1
+# if you want to support virtual host, you must set the http port for listening (optional)
+# Note: http port and https port can be same with bind_port
+vhost_http_port = ${set_vhost_http_port}
+vhost_https_port = ${set_vhost_https_port}
+# response header timeout(seconds) for vhost http server, default is 60s
+# vhost_http_timeout = 60
+# set dashboard_addr and dashboard_port to view dashboard of frps
+# dashboard_addr's default value is same with bind_addr
+# dashboard is available only if dashboard_port is set
+dashboard_addr = 0.0.0.0
+dashboard_port = ${set_dashboard_port}
+# dashboard user and passwd for basic auth protect, if not set, both default value is admin
+dashboard_user = ${set_dashboard_user}
+dashboard_pwd = ${set_dashboard_pwd}
+# dashboard assets directory(only for debug mode)
+# assets_dir = ./static
+# console or real logFile path like ./frps.log
+log_file = ${str_log_file}
+# trace, debug, info, warn, error
+log_level = ${str_log_level}
+log_max_days = ${set_log_max_days}
+# disable log colors when log_file is console, default is false
+#disable_log_color = false
+# auth token
+token = ${set_token}
+# heartbeat configure, it's not recommended to modify the default value
+# the default value of heartbeat_timeout is 90
+# heartbeat_timeout = 90
+# only allow frpc to bind ports you list, if you set nothing, there won't be any limit
+#allow_ports = 2000-3000,3001,3003,4000-50000
+# pool_count in each proxy will change to max_pool_count if they exceed the maximum value
+max_pool_count = ${set_max_pool_count}
+# max ports can be used for each client, default value is 0 means no limit
+#max_ports_per_client = ${set_tcp_mux}
+# if subdomain_host is not empty, you can set subdomain when type is http or https in frpc's configure file
+# when subdomain is test, the host used by routing is test.frps.com
+subdomain_host = ${set_subdomain_host}
+# if tcp stream multiplexing is used, default is true
+tcp_mux = ${set_tcp_mux}
+# custom 404 page for HTTP requests
+# custom_404_page = /path/to/404.html
+EOF
+else
+cat > ${str_program_dir}/${program_config_file}<<-EOF
+# [common] is integral section
+[common]
+# A literal address or host name for IPv6 must be enclosed
+# in square brackets, as in "[::1]:80", "[ipv6-host]:http" or "[ipv6-host%zone]:80"
+bind_addr = 0.0.0.0
+bind_port = ${set_bind_port}
+# udp port to help make udp hole to penetrate nat
+#bind_udp_port = 7001
+# udp port used for kcp protocol, it can be same with 'bind_port'
+# if not set, kcp is disabled in frps
+kcp_bind_port = ${set_bind_port}
+# specify which address proxy will listen for, default value is same with bind_addr
+# proxy_bind_addr = 127.0.0.1
+# if you want to support virtual host, you must set the http port for listening (optional)
+# Note: http port and https port can be same with bind_port
+vhost_http_port = ${set_vhost_http_port}
+vhost_https_port = ${set_vhost_https_port}
+# response header timeout(seconds) for vhost http server, default is 60s
+# vhost_http_timeout = 60
+# set dashboard_addr and dashboard_port to view dashboard of frps
+# dashboard_addr's default value is same with bind_addr
+# dashboard is available only if dashboard_port is set
+dashboard_addr = 0.0.0.0
+dashboard_port = ${set_dashboard_port}
+# dashboard user and passwd for basic auth protect, if not set, both default value is admin
+dashboard_user = ${set_dashboard_user}
+dashboard_pwd = ${set_dashboard_pwd}
+# dashboard assets directory(only for debug mode)
+# assets_dir = ./static
+# console or real logFile path like ./frps.log
+log_file = ${str_log_file}
+# trace, debug, info, warn, error
+log_level = ${str_log_level}
+log_max_days = ${set_log_max_days}
+# disable log colors when log_file is console, default is false
+#disable_log_color = false
+# auth token
+token = ${set_token}
+# heartbeat configure, it's not recommended to modify the default value
+# the default value of heartbeat_timeout is 90
+# heartbeat_timeout = 90
+# only allow frpc to bind ports you list, if you set nothing, there won't be any limit
+#allow_ports = 2000-3000,3001,3003,4000-50000
+# pool_count in each proxy will change to max_pool_count if they exceed the maximum value
+max_pool_count = ${set_max_pool_count}
+# max ports can be used for each client, default value is 0 means no limit
+#max_ports_per_client = ${set_tcp_mux}
+# if subdomain_host is not empty, you can set subdomain when type is http or https in frpc's configure file
+# when subdomain is test, the host used by routing is test.frps.com
+subdomain_host = ${set_subdomain_host}
+# if tcp stream multiplexing is used, default is true
+tcp_mux = ${set_tcp_mux}
+# custom 404 page for HTTP requests
+# custom_404_page = /path/to/404.html
+EOF
+fi
+}
+
+save_client_config(){
+cat > ${client_str_program_dir}/${client_program_config_file}<<-EOF
+# [common] is integral section
+[common]
+# A literal address or host name for IPv6 must be enclosed
+# in square brackets, as in "[::1]:80", "[ipv6-host]:http" or "[ipv6-host%zone]:80"
+server_addr = ${defIP}
+server_port = ${set_bind_port}
+# if you want to connect frps by http proxy or socks5 proxy, you can set http_proxy here or in global environment variables
+# it only works when protocol is tcp
+# http_proxy = http://user:passwd@192.168.1.128:8080
+# http_proxy = socks5://user:passwd@192.168.1.128:1080
+# console or real logFile path like ./frpc.log
+log_file = ${str_client_log_file}
+# trace, debug, info, warn, error
+log_level = ${str_log_level}
+log_max_days = ${set_log_max_days}
+# disable log colors when log_file is console, default is false
+#disable_log_color = false
+# for authentication
+token = ${set_token}
+# Admin assets directory. By default, these assets are bundled with frpc.
+# assets_dir = ./static
+# connections will be established in advance, default value is zero
+pool_count = ${set_max_pool_count}
+# if tcp stream multiplexing is used, default is true, it must be same with frps
+tcp_mux = ${set_tcp_mux}
+###############################
+# set admin address for control frpc's action by http api such as reload
+admin_addr = 127.0.0.1
+admin_port = 7400
+admin_user = admin
+admin_pwd = admin
+# your proxy name will be changed to {user}.{proxy}
+user = your_name
+# decide if exit program when first login failed, otherwise continuous relogin to frps
+# default is true
+login_fail_exit = true
+# communication protocol used to connect to server
+# now it supports tcp and kcp and websocket, default is tcp
+protocol = tcp
+# if tls_enable is true, frpc will connect frps by tls
+tls_enable = true
+# specify a dns server, so frpc will use this instead of default one
+# dns_server = 8.8.8.8
+# proxy names you want to start seperated by ','
+# default is empty, means all proxies
+# start = ssh,dns
+# heartbeat configure, it's not recommended to modify the default value
+# the default value of heartbeat_interval is 10 and heartbeat_timeout is 90
+# heartbeat_interval = 30
+# heartbeat_timeout = 90
+#############################################################################################
+# 'ssh' is the unique proxy name
+# if user in [common] section is not empty, it will be changed to {user}.{proxy} such as 'your_name.ssh'
+#[ssh]
+# tcp | udp | http | https | stcp | xtcp, default is tcp
+#type = tcp
+#local_ip = 127.0.0.1
+#local_port = 22
+# true or false, if true, messages between frps and frpc will be encrypted, default is false
+#use_encryption = false
+# if true, message will be compressed
+#use_compression = false
+# remote port listen by frps
+#remote_port = 6001
+# frps will load balancing connections for proxies in same group
+#group = test_group
+# group should have same group key
+#group_key = 123456
+# enable health check for the backend service, it support 'tcp' and 'http' now
+# frpc will connect local service's port to detect it's healthy status
+#health_check_type = tcp
+# health check connection timeout
+#health_check_timeout_s = 3
+# if continuous failed in 3 times, the proxy will be removed from frps
+#health_check_max_failed = 3
+# every 10 seconds will do a health check
+#health_check_interval_s = 10
+#############################################################################################
+#[ssh_random]
+#type = tcp
+#local_ip = 127.0.0.1
+#local_port = 22
+# if remote_port is 0, frps will assign a random port for you
+#remote_port = 0
+#############################################################################################
+# if you want to expose multiple ports, add 'range:' prefix to the section name
+# frpc will generate multiple proxies such as 'tcp_port_6010', 'tcp_port_6011' and so on.
+#[range:tcp_port]
+#type = tcp
+#local_ip = 127.0.0.1
+#local_port = 6010-6020,6022,6024-6028
+#remote_port = 6010-6020,6022,6024-6028
+#use_encryption = false
+#use_compression = false
+##############################################################################################
+#[dns]
+#type = udp
+#local_ip = 114.114.114.114
+#local_port = 53
+#remote_port = 6002
+#use_encryption = false
+#use_compression = false
+#############################################################################################
+#[range:udp_port]
+#type = udp
+#local_ip = 127.0.0.1
+#local_port = 6010-6020
+#remote_port = 6010-6020
+#use_encryption = false
+#use_compression = false
+#############################################################################################
+# Resolve your domain names to [server_addr] so you can use http://web01.${set_subdomain_host} to browse web01 and http://web02.${set_subdomain_host} to browse web02
+[web01]
+type = http
+local_ip = 127.0.0.1
+local_port = 80
+use_encryption = false
+use_compression = true
+# http username and password are safety certification for http protocol
+# if not set, you can access this custom_domains without certification
+http_user = admin
+http_pwd = admin
+# if domain for frps is frps.com, then you can access [web01] proxy by URL http://test.frps.com
+subdomain = web01
+custom_domains = web02.${set_subdomain_host}
+
+# locations is only available for http type
+locations = /,/pic
+host_header_rewrite = example.com
+# params with prefix "header_" will be used to update http request headers
+header_X-From-Where = frp
+health_check_type = http
+# frpc will send a GET http request '/status' to local http service
+# http service is alive when it return 2xx http response code
+health_check_url = /status
+health_check_interval_s = 10
+health_check_max_failed = 3
+health_check_timeout_s = 3
+#############################################################################################
+[web02]
+type = https
+local_ip = 127.0.0.1
+local_port = 8000
+use_encryption = false
+use_compression = false
+subdomain = web01
+custom_domains = web02.${set_subdomain_host}
+# if not empty, frpc will use proxy protocol to transfer connection info to your local service
+# v1 or v2 or empty
+proxy_protocol_version = v2
+#############################################################################################
+#[plugin_unix_domain_socket]
+#type = tcp
+#remote_port = 6003
+# if plugin is defined, local_ip and local_port is useless
+# plugin will handle connections got from frps
+#plugin = unix_domain_socket
+# params with prefix "plugin_" that plugin needed
+#plugin_unix_path = /var/run/docker.sock
+#############################################################################################
+#[plugin_http_proxy]
+#type = tcp
+#remote_port = 6004
+#plugin = http_proxy
+#plugin_http_user = abc
+#plugin_http_passwd = abc
+#[plugin_socks5]
+#type = tcp
+#remote_port = 6005
+#plugin = socks5
+#plugin_user = abc
+#plugin_passwd = abc
+#
+#[plugin_static_file]
+#type = tcp
+#remote_port = 6006
+#plugin = static_file
+#plugin_local_path = /var/www/blog
+#plugin_strip_prefix = static
+#plugin_http_user = abc
+#plugin_http_passwd = abc
+#############################################################################################
+[plugin_https2http]
+type = https
+custom_domains = test.${set_subdomain_host}
+plugin = https2http
+plugin_local_addr = 127.0.0.1:80
+plugin_crt_path = ./server.crt
+plugin_key_path = ./server.key
+plugin_host_header_rewrite = 127.0.0.1
+plugin_header_X-From-Where = frp
+#############################################################################################
+#[secret_tcp]
+# If the type is secret tcp, remote_port is useless
+# Who want to connect local port should deploy another frpc with stcp proxy and role is visitor
+#type = stcp
+# sk used for authentication for visitors
+#sk = abcdefg
+#local_ip = 127.0.0.1
+#local_port = 22
+#use_encryption = false
+#use_compression = false
+#############################################################################################
+# user of frpc should be same in both stcp server and stcp visitor
+#[secret_tcp_visitor]
+# frpc role visitor -> frps -> frpc role server
+#role = visitor
+#type = stcp
+# the server name you want to visitor
+#server_name = secret_tcp
+#sk = abcdefg
+# connect this address to visitor stcp server
+#bind_addr = 127.0.0.1
+#bind_port = 9000
+#use_encryption = false
+#use_compression = false
+#############################################################################################
+#[p2p_tcp]
+#type = xtcp
+#sk = abcdefg
+#local_ip = 127.0.0.1
+#local_port = 22
+#use_encryption = false
+#use_compression = false
+#############################################################################################
+#[p2p_tcp_visitor]
+#role = visitor
+#type = xtcp
+#server_name = p2p_tcp
+#sk = abcdefg
+#bind_addr = 127.0.0.1
+#bind_port = 9001
+#use_encryption = false
+#use_compression = false
+#############################################################################################
+EOF
+}
+
 pre_install_clang(){
     fun_clangcn
     echo -e "Check your server setting, please wait..."
@@ -464,17 +838,20 @@ pre_install_clang(){
         case "${str_log_file}" in
             1|[yY]|[yY][eE][sS]|[oO][nN]|[tT][rR][uU][eE]|[eE][nN][aA][bB][lL][eE])
                 str_log_file="./frps.log"
+                str_client_log_file="./frpc.log"
                 str_log_file_flag="enable"
                 ;;
             0|2|[nN]|[nN][oO]|[oO][fF][fF]|[fF][aA][lL][sS][eE]|[dD][iI][sS][aA][bB][lL][eE])
                 str_log_file="/dev/null"
+                str_client_log_file="/dev/null"
                 str_log_file_flag="disable"
                 ;;
             [eE][xX][iI][tT])
                 exit 1
                 ;;
             *)
-                str_log_file="./frps.log"
+                str_log_file="./frps.log"                
+                str_client_log_file="./frpc.log"
                 str_log_file_flag="enable"
                 ;;
         esac
@@ -551,132 +928,24 @@ pre_install_clang(){
 install_program_server_clang(){
     [ ! -d ${str_program_dir} ] && mkdir -p ${str_program_dir}
     cd ${str_program_dir}
-    echo "${program_name} install path:$PWD"
-
+    echo  "${program_name} install path:$PWD"
     echo -n "config file for ${program_name} ..."
-# Config file
-if [[ "${set_kcp}" == "false" ]]; then
-cat > ${str_program_dir}/${program_config_file}<<-EOF
-# [common] is integral section
-[common]
-# A literal address or host name for IPv6 must be enclosed
-# in square brackets, as in "[::1]:80", "[ipv6-host]:http" or "[ipv6-host%zone]:80"
-bind_addr = 0.0.0.0
-bind_port = ${set_bind_port}
-# udp port to help make udp hole to penetrate nat
-#bind_udp_port = 7001
-# udp port used for kcp protocol, it can be same with 'bind_port'
-# if not set, kcp is disabled in frps
-#kcp_bind_port = ${set_bind_port}
-# specify which address proxy will listen for, default value is same with bind_addr
-# proxy_bind_addr = 127.0.0.1
-# if you want to support virtual host, you must set the http port for listening (optional)
-# Note: http port and https port can be same with bind_port
-vhost_http_port = ${set_vhost_http_port}
-vhost_https_port = ${set_vhost_https_port}
-# response header timeout(seconds) for vhost http server, default is 60s
-# vhost_http_timeout = 60
-# set dashboard_addr and dashboard_port to view dashboard of frps
-# dashboard_addr's default value is same with bind_addr
-# dashboard is available only if dashboard_port is set
-dashboard_addr = 0.0.0.0
-dashboard_port = ${set_dashboard_port}
-# dashboard user and passwd for basic auth protect, if not set, both default value is admin
-dashboard_user = ${set_dashboard_user}
-dashboard_pwd = ${set_dashboard_pwd}
-# dashboard assets directory(only for debug mode)
-# assets_dir = ./static
-# console or real logFile path like ./frps.log
-log_file = ${str_log_file}
-# trace, debug, info, warn, error
-log_level = ${str_log_level}
-log_max_days = ${set_log_max_days}
-# disable log colors when log_file is console, default is false
-#disable_log_color = false
-# auth token
-token = ${set_token}
-# heartbeat configure, it's not recommended to modify the default value
-# the default value of heartbeat_timeout is 90
-# heartbeat_timeout = 90
-# only allow frpc to bind ports you list, if you set nothing, there won't be any limit
-#allow_ports = 2000-3000,3001,3003,4000-50000
-# pool_count in each proxy will change to max_pool_count if they exceed the maximum value
-max_pool_count = ${set_max_pool_count}
-# max ports can be used for each client, default value is 0 means no limit
-#max_ports_per_client = ${set_tcp_mux}
-# if subdomain_host is not empty, you can set subdomain when type is http or https in frpc's configure file
-# when subdomain is test, the host used by routing is test.frps.com
-subdomain_host = ${set_subdomain_host}
-# if tcp stream multiplexing is used, default is true
-tcp_mux = true
-# custom 404 page for HTTP requests
-# custom_404_page = /path/to/404.html
-EOF
-else
-cat > ${str_program_dir}/${program_config_file}<<-EOF
-# [common] is integral section
-[common]
-# A literal address or host name for IPv6 must be enclosed
-# in square brackets, as in "[::1]:80", "[ipv6-host]:http" or "[ipv6-host%zone]:80"
-bind_addr = 0.0.0.0
-bind_port = ${set_bind_port}
-# udp port to help make udp hole to penetrate nat
-#bind_udp_port = 7001
-# udp port used for kcp protocol, it can be same with 'bind_port'
-# if not set, kcp is disabled in frps
-kcp_bind_port = ${set_bind_port}
-# specify which address proxy will listen for, default value is same with bind_addr
-# proxy_bind_addr = 127.0.0.1
-# if you want to support virtual host, you must set the http port for listening (optional)
-# Note: http port and https port can be same with bind_port
-vhost_http_port = ${set_vhost_http_port}
-vhost_https_port = ${set_vhost_https_port}
-# response header timeout(seconds) for vhost http server, default is 60s
-# vhost_http_timeout = 60
-# set dashboard_addr and dashboard_port to view dashboard of frps
-# dashboard_addr's default value is same with bind_addr
-# dashboard is available only if dashboard_port is set
-dashboard_addr = 0.0.0.0
-dashboard_port = ${set_dashboard_port}
-# dashboard user and passwd for basic auth protect, if not set, both default value is admin
-dashboard_user = ${set_dashboard_user}
-dashboard_pwd = ${set_dashboard_pwd}
-# dashboard assets directory(only for debug mode)
-# assets_dir = ./static
-# console or real logFile path like ./frps.log
-log_file = ${str_log_file}
-# trace, debug, info, warn, error
-log_level = ${str_log_level}
-log_max_days = ${set_log_max_days}
-# disable log colors when log_file is console, default is false
-#disable_log_color = false
-# auth token
-token = ${set_token}
-# heartbeat configure, it's not recommended to modify the default value
-# the default value of heartbeat_timeout is 90
-# heartbeat_timeout = 90
-# only allow frpc to bind ports you list, if you set nothing, there won't be any limit
-#allow_ports = 2000-3000,3001,3003,4000-50000
-# pool_count in each proxy will change to max_pool_count if they exceed the maximum value
-max_pool_count = ${set_max_pool_count}
-# max ports can be used for each client, default value is 0 means no limit
-#max_ports_per_client = ${set_tcp_mux}
-# if subdomain_host is not empty, you can set subdomain when type is http or https in frpc's configure file
-# when subdomain is test, the host used by routing is test.frps.com
-subdomain_host = ${set_subdomain_host}
-# if tcp stream multiplexing is used, default is true
-tcp_mux = true
-# custom 404 page for HTTP requests
-# custom_404_page = /path/to/404.html
-EOF
-fi
+    # Config file
+    save_server_config
+    echo ""
+    [ ! -d ${client_str_program_dir} ] && mkdir -p ${client_str_program_dir}
+    cd ${client_str_program_dir}
+    echo "${client_program_name} install path:$PWD"
+    echo -n "config file for ${client_program_name} ..."
+    save_client_config
+
     echo " done"
 
     echo -n "download ${program_name} ..."
     rm -f ${str_program_dir}/${program_name} ${program_init}
     fun_download_file
     echo " done"
-    echo -n "download ${program_init}..."
+    echo "download ${program_init}..."
     if [ ! -s ${program_init} ]; then
         if ! wget --no-check-certificate -q ${FRPS_INIT} -O ${program_init}; then
             echo -e " ${COLOR_RED}failed${COLOR_END}"
@@ -739,6 +1008,13 @@ configure_program_server_clang(){
         echo "${program_name} configuration file not found!"
         exit 1
     fi
+
+    if [ -s ${client_str_program_dir}/${client_program_config_file} ]; then
+        vi ${client_str_program_dir}/${client_program_config_file}
+    else
+        echo "${client_program_name} configuration file not found!"
+        exit 1
+    fi
 }
 ############################### uninstall ##################################
 uninstall_program_server_clang(){
@@ -769,13 +1045,54 @@ uninstall_program_server_clang(){
             else
                 update-rc.d -f ${program_name} remove
             fi
-            rm -f ${program_init} /var/run/${program_name}.pid /usr/bin/${program_name}
+            echo 1
+            rm -f ${program_init} 
+            echo 2
+            rm -f /var/run/${program_name}.pid 
+            echo 3
+            rm -f /usr/bin/${program_name}
+            echo 4
             rm -fr ${str_program_dir}
             echo "${program_name} uninstall success!"
         fi
     else
         echo "${program_name} Not install!"
     fi
+
+    if [ -s ${client_str_program_dir}/${client_program_name} ] ; then
+        echo "============== Uninstall ${client_program_name} =============="
+        str_uninstall="n"
+        echo -n -e "${COLOR_YELOW}You want to uninstall?${COLOR_END}"
+        read -p "[y/n]:" str_uninstall
+        case "${str_uninstall}" in
+        [yY]|[yY][eE][sS])
+        echo ""
+        echo "You select [Yes], press any key to continue."
+        str_uninstall="y"
+        char=`get_char`
+        ;;
+        *)
+        echo ""
+        str_uninstall="n"
+        esac
+        if [ "${str_uninstall}" == 'n' ]; then
+            echo "You select [No],shell exit!"
+        else
+            checkos
+            #${client_program_init} stop
+            #if [ "${OS}" == 'CentOS' ]; then
+            #    chkconfig --del ${client_program_name}
+            #else
+            #    update-rc.d -f ${client_program_name} remove
+            #fi
+            #rm -f ${client_program_init} /var/run/${client_program_name}.pid /usr/bin/${client_program_name}
+            rm -fr ${client_str_program_dir}
+            echo "${client_program_name} uninstall success!"
+        fi
+    else
+        echo "${client_program_name} Not install!"
+    fi
+    rm -rf /usr/local/${soft_name}
     exit 0
 }
 ############################### update ##################################
@@ -800,9 +1117,11 @@ update_config_clang(){
                 [ -z "${set_subdomain_host_update}" ] && set_subdomain_host_update="${def_subdomain_host_update}"
                 echo "${program_name} subdomain_host: ${set_subdomain_host_update}"
                 sed -i "/subdomain_host = ${set_subdomain_host_update}\n" ${str_program_dir}/${program_config_file}
+                sed -i "/custom_domains = example.${set_subdomain_host_update}\n" ${client_str_program_dir}/${client_program_config_file}
             fi
             if [ ! -z "${search_token}" ];then
-                sed -i "s/privilege_token/token/" ${str_program_dir}/${program_config_file}
+                sed -i "s/privilege_token/token/" ${str_program_dir}/${program_config_file}                
+                sed -i "s/privilege_token/token/" ${client_str_program_dir}/${client_program_config_file}
             fi
             if [ -z "${search_dashboard_user}" ] && [ -z "${search_dashboard_pwd}" ];then
                 def_dashboard_user_update="admin"
@@ -844,6 +1163,8 @@ update_config_clang(){
                 else
                     sed -i "/^bind_port =.*/a\# udp port used for kcp protocol, it can be same with 'bind_port'\n# if not set, kcp is disabled in frps\nkcp_bind_port = ${def_kcp_bind_port}\n" ${str_program_dir}/${program_config_file}
                 fi
+
+                sed -i "/^server_port =.*/a server_port = ${def_kcp_bind_port}\n" ${client_str_program_dir}/${client_program_config_file}
             fi
             if [ -z "${search_tcp_mux}" ];then
                 echo "##### Please select tcp_mux #####"
@@ -868,6 +1189,9 @@ update_config_clang(){
                 echo "tcp_mux: ${set_tcp_mux}"
                 sed -i "/^privilege_mode = true/d" ${str_program_dir}/${program_config_file}
                 sed -i "/^token =.*/a\# if tcp stream multiplexing is used, default is true\ntcp_mux = ${set_tcp_mux}\n" ${str_program_dir}/${program_config_file}
+
+                sed -i "/^token =.*/a\# if tcp stream multiplexing is used, default is true, it must be same with frps\ntcp_mux = ${set_tcp_mux}\n" ${client_str_program_dir}/${client_program_config_file}
+
             fi
             if [ ! -z "${search_allow_ports}" ];then
                 sed -i "s/privilege_allow_ports/allow_ports/" ${str_program_dir}/${program_config_file}
@@ -887,6 +1211,7 @@ update_config_clang(){
         fi
     fi
 }
+
 update_program_server_clang(){
     fun_clangcn "clear"
     if [ -s ${program_init} ] || [ -s ${str_program_dir}/${program_name} ] ; then
