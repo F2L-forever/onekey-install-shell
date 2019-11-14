@@ -928,14 +928,14 @@ pre_install_clang(){
 install_program_server_clang(){
     [ ! -d ${str_program_dir} ] && mkdir -p ${str_program_dir}
     cd ${str_program_dir}
-    echo  "${program_name} install path:$PWD"
+    echo -n "${program_name} install path:$PWD"
     echo -n "config file for ${program_name} ..."
     # Config file
     save_server_config
-    echo ""
+    echo "done"
     [ ! -d ${client_str_program_dir} ] && mkdir -p ${client_str_program_dir}
     cd ${client_str_program_dir}
-    echo "${client_program_name} install path:$PWD"
+    echo -n "${client_program_name} install path:$PWD"
     echo -n "config file for ${client_program_name} ..."
     save_client_config
 
@@ -945,7 +945,7 @@ install_program_server_clang(){
     rm -f ${str_program_dir}/${program_name} ${program_init}
     fun_download_file
     echo " done"
-    echo "download ${program_init}..."
+    echo -n "download ${program_init}..."
     if [ ! -s ${program_init} ]; then
         if ! wget --no-check-certificate -q ${FRPS_INIT} -O ${program_init}; then
             echo -e " ${COLOR_RED}failed${COLOR_END}"
@@ -1045,13 +1045,9 @@ uninstall_program_server_clang(){
             else
                 update-rc.d -f ${program_name} remove
             fi
-            echo 1
             rm -f ${program_init} 
-            echo 2
             rm -f /var/run/${program_name}.pid 
-            echo 3
             rm -f /usr/bin/${program_name}
-            echo 4
             rm -fr ${str_program_dir}
             echo "${program_name} uninstall success!"
         fi
