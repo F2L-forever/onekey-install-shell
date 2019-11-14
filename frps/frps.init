@@ -111,20 +111,6 @@ fun_status(){
         exit 0
     fi
 }
-checkos(){
-    if grep -Eqi "CentOS" /etc/issue || grep -Eq "CentOS" /etc/*-release; then
-        OS=CentOS
-    elif grep -Eqi "Debian" /etc/issue || grep -Eq "Debian" /etc/*-release; then
-        OS=Debian
-    elif grep -Eqi "Ubuntu" /etc/issue || grep -Eq "Ubuntu" /etc/*-release; then
-        OS=Ubuntu
-    elif grep -Eqi "Alpine" /etc/issue || grep -Eq "Alpine" /etc/*-release; then
-        OS=Alpine
-    else
-        echo "Not support OS, Please reinstall OS and retry!"
-        return 1
-    fi
-}
 fun_config(){
     if [ -s ${CONFIGFILE} ]; then
         vi ${CONFIGFILE}
@@ -133,6 +119,7 @@ fun_config(){
         return 1
     fi
 }
+
 fun_version(){
     echo "${ProgramName} version ${program_version}"
     return 0

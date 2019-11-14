@@ -433,7 +433,7 @@ token = ${set_token}
 # pool_count in each proxy will change to max_pool_count if they exceed the maximum value
 max_pool_count = ${set_max_pool_count}
 # max ports can be used for each client, default value is 0 means no limit
-#max_ports_per_client = ${set_tcp_mux}
+#max_ports_per_client = true
 # if subdomain_host is not empty, you can set subdomain when type is http or https in frpc's configure file
 # when subdomain is test, the host used by routing is test.frps.com
 subdomain_host = ${set_subdomain_host}
@@ -441,6 +441,7 @@ subdomain_host = ${set_subdomain_host}
 tcp_mux = ${set_tcp_mux}
 # custom 404 page for HTTP requests
 # custom_404_page = /path/to/404.html
+
 EOF
 else
 cat > ${str_program_dir}/${program_config_file}<<-EOF
@@ -490,7 +491,7 @@ token = ${set_token}
 # pool_count in each proxy will change to max_pool_count if they exceed the maximum value
 max_pool_count = ${set_max_pool_count}
 # max ports can be used for each client, default value is 0 means no limit
-#max_ports_per_client = ${set_tcp_mux}
+#max_ports_per_client = true
 # if subdomain_host is not empty, you can set subdomain when type is http or https in frpc's configure file
 # when subdomain is test, the host used by routing is test.frps.com
 subdomain_host = ${set_subdomain_host}
@@ -544,7 +545,7 @@ login_fail_exit = true
 # now it supports tcp and kcp and websocket, default is tcp
 protocol = tcp
 # if tls_enable is true, frpc will connect frps by tls
-tls_enable = true
+#tls_enable = true
 # specify a dns server, so frpc will use this instead of default one
 # dns_server = 8.8.8.8
 # proxy names you want to start seperated by ','
@@ -615,45 +616,45 @@ tls_enable = true
 #use_encryption = false
 #use_compression = false
 #############################################################################################
-# Resolve your domain names to [server_addr] so you can use http://web01.${set_subdomain_host} to browse web01 and http://web02.${set_subdomain_host} to browse web02
-[web01]
+# Resolve your domain names to [server_addr] so you can use http://web01.ngrok.qqmylove.top to browse web01 and http://web02.ngrok.qqmylove.top to browse web02
+[http]
 type = http
 local_ip = 127.0.0.1
-local_port = 80
+local_port = 8080
 use_encryption = false
 use_compression = true
 # http username and password are safety certification for http protocol
 # if not set, you can access this custom_domains without certification
-http_user = admin
-http_pwd = admin
+#http_user = admin
+#http_pwd = admin
 # if domain for frps is frps.com, then you can access [web01] proxy by URL http://test.frps.com
-subdomain = web01
-custom_domains = web02.${set_subdomain_host}
+subdomain = your_name
+#custom_domains = hl.qqmylove.top
 
 # locations is only available for http type
-locations = /,/pic
-host_header_rewrite = example.com
+#locations = /,/pic
+#host_header_rewrite = example.com
 # params with prefix "header_" will be used to update http request headers
-header_X-From-Where = frp
-health_check_type = http
+#header_X-From-Where = frp
+#health_check_type = http
 # frpc will send a GET http request '/status' to local http service
 # http service is alive when it return 2xx http response code
-health_check_url = /status
-health_check_interval_s = 10
-health_check_max_failed = 3
-health_check_timeout_s = 3
+#health_check_url = /status
+#health_check_interval_s = 10
+#health_check_max_failed = 3
+#health_check_timeout_s = 3
 #############################################################################################
-[web02]
-type = https
-local_ip = 127.0.0.1
-local_port = 8000
-use_encryption = false
-use_compression = false
-subdomain = web01
-custom_domains = web02.${set_subdomain_host}
+#[web02]
+#type = https
+#local_ip = 127.0.0.1
+#local_port = 8000
+#use_encryption = false
+#use_compression = false
+#subdomain = web01
+#custom_domains = web02.ngrok.qqmylove.top
 # if not empty, frpc will use proxy protocol to transfer connection info to your local service
 # v1 or v2 or empty
-proxy_protocol_version = v2
+#proxy_protocol_version = v2
 #############################################################################################
 #[plugin_unix_domain_socket]
 #type = tcp
@@ -686,15 +687,15 @@ proxy_protocol_version = v2
 #plugin_http_user = abc
 #plugin_http_passwd = abc
 #############################################################################################
-[plugin_https2http]
-type = https
-custom_domains = test.${set_subdomain_host}
-plugin = https2http
-plugin_local_addr = 127.0.0.1:80
-plugin_crt_path = ./server.crt
-plugin_key_path = ./server.key
-plugin_host_header_rewrite = 127.0.0.1
-plugin_header_X-From-Where = frp
+#[plugin_https2http]
+#type = https
+#custom_domains = test.ngrok.qqmylove.top
+#plugin = https2http
+#plugin_local_addr = 127.0.0.1:80
+#plugin_crt_path = ./server.crt
+#plugin_key_path = ./server.key
+#plugin_host_header_rewrite = 127.0.0.1
+#plugin_header_X-From-Where = frp
 #############################################################################################
 #[secret_tcp]
 # If the type is secret tcp, remote_port is useless
@@ -938,9 +939,8 @@ install_program_server_clang(){
     echo -n "${client_program_name} install path:$PWD"
     echo -n "config file for ${client_program_name} ..."
     save_client_config
-
     echo " done"
-
+    cd ${str_program_dir}
     echo -n "download ${program_name} ..."
     rm -f ${str_program_dir}/${program_name} ${program_init}
     fun_download_file
