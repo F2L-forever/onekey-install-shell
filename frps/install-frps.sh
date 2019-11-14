@@ -164,9 +164,9 @@ pre_install_packs(){
     if [[ ${wget_flag} -gt 1 ]] || [[ ${killall_flag} -gt 1 ]] || [[ ${netstat_flag} -gt 6 ]];then
         echo -e "${COLOR_GREEN} Install support packs...${COLOR_END}"
         if [ "${OS}" == 'CentOS' ]; then
-            yum install -y wget psmisc net-tools
+            yum install -y wget psmisc net-tools lrzsz
         else
-            apt-get -y update && apt-get -y install wget psmisc net-tools
+            apt-get -y update && apt-get -y install wget psmisc net-tools lrzsz
         fi
     fi
 }
@@ -193,27 +193,32 @@ fun_get_version(){
     fi
 }
 fun_getServer(){
-    def_server_url="github"
+    def_server_url="aliyun"
     echo ""
     echo -e "Please select ${program_name} download url:"
-    echo -e "[1].github (default)"
-    read -p "Enter your choice (1 or exit. default [${def_server_url}]): " set_server_url
+    echo -e "[1].aliyun (default)"
+    echo -e "[2].github"
+    read -p "Enter your choice (1, 2 or exit. default [${def_server_url}]): " set_server_url
     [ -z "${set_server_url}" ] && set_server_url="${def_server_url}"
     case "${set_server_url}" in
         1|[Aa][Ll][Ii][Yy][Uu][Nn])
+            program_download_url=${aliyun_download_url}
+            ;;
+        2|[Gg][Ii][Tt][Hh][Uu][Bb])
             program_download_url=${github_download_url}
             ;;
         [eE][xX][iI][tT])
             exit 1
             ;;
         *)
-            program_download_url=${github_download_url}
+            program_download_url=${aliyun_download_url}
             ;;
     esac
     echo "---------------------------------------"
     echo "Your select: ${set_server_url}"
     echo "---------------------------------------"
 }
+
 fun_getVer(){
     echo -e "Loading network version for ${program_name}, please wait..."
     program_latest_filename="frp_${FRPS_VER}_linux_${ARCHS}.tar.gz"
@@ -249,6 +254,10 @@ fun_download_file(){
         exit 1
     fi
 }
+fun_down_frpc_ini(){
+    sz ${client_str_program_dir}/${client_program_config_file}
+}
+
 function __readINI() {
  INIFILE=$1; SECTION=$2; ITEM=$3
  _readIni=`awk -F '=' '/\['$SECTION'\]/{a=1}a==1&&$1~/'$ITEM'/{print $2;exit}' $INIFILE`
@@ -533,11 +542,11 @@ tcp_mux = ${set_tcp_mux}
 ###############################
 # set admin address for control frpc's action by http api such as reload
 admin_addr = 127.0.0.1
-admin_port = 7400
-admin_user = admin
-admin_pwd = admin
+admin_port = 7400 #修改此处
+admin_user = admin #修改此处
+admin_pwd = admin #修改此处
 # your proxy name will be changed to {user}.{proxy}
-user = your_name
+user = your_name #修改此处
 # decide if exit program when first login failed, otherwise continuous relogin to frps
 # default is true
 login_fail_exit = true
@@ -620,17 +629,15 @@ protocol = tcp
 [http]
 type = http
 local_ip = 127.0.0.1
-local_port = 8080
-use_encryption = false
+local_port = 8080 #修改此处
+use_encryption = true
 use_compression = true
 # http username and password are safety certification for http protocol
 # if not set, you can access this custom_domains without certification
 #http_user = admin
 #http_pwd = admin
 # if domain for frps is frps.com, then you can access [web01] proxy by URL http://test.frps.com
-subdomain = your_name
-#custom_domains = hl.qqmylove.top
-
+subdomain = your_name #修改此处
 # locations is only available for http type
 #locations = /,/pic
 #host_header_rewrite = example.com
@@ -929,14 +936,14 @@ pre_install_clang(){
 install_program_server_clang(){
     [ ! -d ${str_program_dir} ] && mkdir -p ${str_program_dir}
     cd ${str_program_dir}
-    echo -n "${program_name} install path:$PWD"
+    echo  "${program_name} install path:$PWD"
     echo -n "config file for ${program_name} ..."
     # Config file
     save_server_config
     echo "done"
     [ ! -d ${client_str_program_dir} ] && mkdir -p ${client_str_program_dir}
     cd ${client_str_program_dir}
-    echo -n "${client_program_name} install path:$PWD"
+    echo  "${client_program_name} install path:$PWD"
     echo -n "config file for ${client_program_name} ..."
     save_client_config
     echo " done"
@@ -968,6 +975,9 @@ install_program_server_clang(){
     [ -s ${program_init} ] && ln -s ${program_init} /usr/bin/${program_name}
     ${program_init} start
     fun_clangcn
+    echo -n "正在下载客户端文件配置..."
+    fun_down_frpc_ini
+    echo " done"
     #install successfully
     echo ""
     echo "Congratulations, ${program_name} install completed!"
