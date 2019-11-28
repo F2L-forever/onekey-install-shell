@@ -543,11 +543,15 @@ tcp_mux = ${set_tcp_mux}
 ###############################
 # set admin address for control frpc's action by http api such as reload
 admin_addr = 127.0.0.1
-admin_port = 7400 #修改此处
-admin_user = admin #修改此处
-admin_pwd = admin #修改此处
+#修改此处
+#admin_port = 7400
+#修改此处
+#admin_user = admin
+#修改此处
+#admin_pwd = admin
 # your proxy name will be changed to {user}.{proxy}
-user = your_name #修改此处
+#修改此处
+user = your_name
 # decide if exit program when first login failed, otherwise continuous relogin to frps
 # default is true
 login_fail_exit = true
@@ -630,7 +634,8 @@ protocol = tcp
 [http]
 type = http
 local_ip = 127.0.0.1
-local_port = 8080 #修改此处
+#修改此处
+local_port = 8080
 use_encryption = true
 use_compression = true
 # http username and password are safety certification for http protocol
@@ -638,7 +643,8 @@ use_compression = true
 #http_user = admin
 #http_pwd = admin
 # if domain for frps is frps.com, then you can access [web01] proxy by URL http://test.frps.com
-subdomain = your_name #修改此处
+#修改此处
+subdomain = your_name
 # locations is only available for http type
 #locations = /,/pic
 #host_header_rewrite = example.com
