@@ -1,0 +1,60 @@
+2019/11/28 11:17:45 [I] [service.go:249] [59d3d5e94bc6da0c] login to server success, get run id [59d3d5e94bc6da0c], server udp port [0]
+2019/11/28 11:17:45 [I] [proxy_manager.go:144] [59d3d5e94bc6da0c] proxy added: [test.http]
+2019/11/28 11:17:45 [I] [control.go:164] [59d3d5e94bc6da0c] [test.http] start proxy success
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [I] [control.go:251] [59d3d5e94bc6da0c] control writer is closing
+2019/11/28 11:18:14 [I] [service.go:148] [59d3d5e94bc6da0c] try to reconnect to server...
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [E] [control.go:147] [59d3d5e94bc6da0c] work connection closed before response StartWorkConn message: EOF
+2019/11/28 11:18:14 [W] [service.go:151] [59d3d5e94bc6da0c] reconnect to server error: dial tcp 120.25.225.59:7000: connect: connection refused
+2019/11/28 11:18:15 [I] [service.go:148] [59d3d5e94bc6da0c] try to reconnect to server...
+2019/11/28 11:18:31 [I] [service.go:249] [59d3d5e94bc6da0c] login to server success, get run id [59d3d5e94bc6da0c], server udp port [0]
+2019/11/28 11:18:31 [I] [proxy_manager.go:144] [59d3d5e94bc6da0c] proxy added: [test.http]
+2019/11/28 11:18:31 [I] [control.go:164] [59d3d5e94bc6da0c] [test.http] start proxy success
